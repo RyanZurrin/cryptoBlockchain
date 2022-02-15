@@ -37,8 +37,12 @@ class Blockchain:
     def proof_of_work(self, previous_proof):
         new_proof = 1 
         check_proof = False
-        
+        # this is where the proof of work algorithm loops until it finds a valid proof. A valid proof is one that is
+        # hashed with 4 leading zeros. To increase difficulty, increase the number of leading zeros required. Once a
+        # valid proof is found, the loop ends and the new_proof is returned, which is how you will verify that a
+        # block is valid.
         while check_proof is False:
+            # uses the hashlib library to hash the new_proof with the previous_proof.
             hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest()
             if hash_operation[:4] == '0000':
                 check_proof = True
@@ -112,6 +116,7 @@ blockchain = Blockchain()
 def mine_block():
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
+    # this is how a block is mined using the proof of work algorithm above.
     proof = blockchain.proof_of_work(previous_proof)
     previous_hash = blockchain.hash(previous_block)
     blockchain.add_transaction(sender = node_address, receiver = 'Ryan', amount = 1)
@@ -139,7 +144,7 @@ def is_valid():
         response = {'message' : 'All good. The Blockchain is valid.'}
     else:
         response = {'message' : 'Huston, we have a problem. The Blockchain is not valid'}
-    return jsonify(response), 200
+    return jsonify(response), 200 # 200 is the status code for OK
 
 # Adding a new transaction to the Blockchain
 @app.route('/add_transaction', methods=['POST'])
@@ -150,7 +155,7 @@ def add_transaction():
         return 'Some elements of the transaction are missing', 400
     index = blockchain.add_transaction(json['sender'], json['receiver'], json['amount'])
     response = {'message' : f'This transaction will be added to Block{index}'}
-    return jsonify(response), 201
+    return jsonify(response), 201 # 201 is the status code for created successfully
 
 # Part 3 - Decentralizing our Blockchain
 @app.route('/connect_node', methods=['POST'])
@@ -158,7 +163,7 @@ def connect_node():
     json = request.get_json()
     nodes = json.get('nodes')
     if nodes is None:
-        return "No node", 400
+        return "No node", 400 # 400 is the status code for bad request
     for node in nodes:
         blockchain.add_node(node)
     response = {'message': 'All the nodes are now connected. The REZcoin Blockchain now contains the following nodes:',
@@ -178,5 +183,5 @@ def replace_chain():
     return jsonify(response), 200
     
 
-#Running the app
+# Running the app
 app.run(host='0.0.0.0', port = 5000)
