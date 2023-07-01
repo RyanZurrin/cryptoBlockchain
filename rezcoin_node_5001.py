@@ -37,9 +37,9 @@ class Blockchain:
     def proof_of_work(self, previous_proof):
         new_proof = 1
         check_proof = False
-        while check_proof is False:
+        while not check_proof:
             hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest()
-            if hash_operation[:4] == '0000':
+            if hash_operation.startswith('0000'):
                 check_proof = True
             else:
                 new_proof += 1
@@ -143,7 +143,7 @@ def is_valid():
 def add_transaction():
     json = request.get_json()
     transaction_keys = ['sender', 'receiver', 'amount']
-    if not all(key in json for key in transaction_keys):
+    if any(key not in json for key in transaction_keys):
         return 'Some elements of the transaction are missing', 400
     index = blockchain.add_transaction(json['sender'], json['receiver'], json['amount'])
     response = {'message': f'This transaction will be added to Block {index}'}
